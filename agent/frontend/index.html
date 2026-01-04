@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Event Agent – Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 5px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 6px;
+    }
+    textarea {
+      width: 100%;
+      height: 90px;
+      padding: 10px;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .box {
+      margin-top: 20px;
+      padding: 10px;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      overflow-x: auto;
+    }
+    .status-ready {
+      color: green;
+      font-weight: bold;
+    }
+    .status-incomplete {
+      color: orange;
+      font-weight: bold;
+    }
+    .status-invalid {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎟️ AI Event Agent – Demo</h1>
+  <p>Scrivi come se stessi parlando con un operatore umano.</p>
+
+  <textarea id="message" placeholder="Es: l'evento si chiama Clappit Orchestra..."></textarea>
+  <br />
+  <button onclick="sendMessage()">Invia</button>
+
+  <div class="box">
+    <h3>🤖 Risposta agente</h3>
+    <div id="agent_message">—</div>
+  </div>
+
+  <div class="box">
+    <h3>📄 Event preview (JSON)</h3>
+    <pre id="event_preview">{}</pre>
+  </div>
+
+  <div class="box">
+    <h3>📊 Publication status</h3>
+    <div id="publication_status">—</div>
+  </div>
+
+</div>
+
+<script>
+  const sessionId = "demo_user";
+
+  async function sendMessage() {
+    const message = document.getElementById("message").value;
+
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: sessionId,
+        message: message
+      })
+    });
+
+    const data = await res.json();
+
+    document.getElementById("agent_message").innerText =
+      data.agent_message || "—";
+
+    document.getElementById("event_preview").innerText =
+      JSON.stringify(data.event_preview, null, 2);
+
+    if (data.publication_status) {
+      const status = data.publication_status.status;
+      let cls = "status-incomplete";
+      if (status === "READY") cls = "status-ready";
+      if (status === "INVALID") cls = "status-invalid";
+
+      document.getElementById("publication_status").innerHTML =
+        `<span class="${cls}">${status}</span>`;
+    }
+  }
+</script>
+
+</body>
+</html>

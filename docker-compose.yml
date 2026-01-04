@@ -1,0 +1,21 @@
+services:
+  agent:
+    build: ./agent
+    container_name: ai-agent
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./agent/.env
+    depends_on:
+      - qdrant
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  qdrant_data:
